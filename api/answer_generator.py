@@ -20,16 +20,16 @@ AnswerMapping = Dict[int, Union[str, List[str]]]
 Question = Dict[str, Any]
 
 DEFAULT_FACTS: Facts = {
-    "full_name": "Cosine Cake",
-    "preferred_name": "Cosine",
-    "email": "student@example.com",
-    "class_year": "2028",
+    "full_name": "Collin Fan",
+    "preferred_name": "Collin",
+    "email": "cfan@college.harvard.edu",
+    "class_year": "2027",
     "concentration": "Computer Science",
-    "house": "Mather House",
-    "residence_number": "Mather Lowrise 214",
-    "phone": "+1 (617) 555-0134",
+    "house": "Dunster House",
+    "residence_number": "Dunster W222",
+    "phone": "3125668877",
     "hometown": "Cambridge, MA",
-    "default_club": "Farmer's Fridge",
+    "default_club": "HUQT",
     "interests": [
         "entrepreneurship",
         "product design",
