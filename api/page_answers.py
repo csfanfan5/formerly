@@ -6,6 +6,7 @@ import os
 from typing import List
 
 from flask import Flask, jsonify, make_response, request
+import os
 
 from answer_generator import Facts, get_page_answers
 

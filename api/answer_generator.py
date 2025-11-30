@@ -143,6 +143,9 @@ def _call_openai_for_page(
         '    {"index": number, "answers": [string, ...]}\n'
         "  ]\n"
         "}\n"
+        "- For checkbox questions, use \"answers\" with an array of choices.\n"
+        "- For matrix questions, use \"answers\" with an array of choices, one per row,\n"
+        "  choosing from the column options (you may respond with the column label or its number).\n"
         "Do not include explanations."
     )
 
@@ -190,6 +193,7 @@ def _parse_page_response(
         qtype = qmeta.get("type")
         options = qmeta.get("options") or []
 
+        # Checkbox: multiple selections from a flat options list
         if qtype == "checkbox":
             raw_answers = item.get("answers") or item.get("answer")
             if isinstance(raw_answers, str):
@@ -201,6 +205,23 @@ def _parse_page_response(
                     answers[idx] = validated
             continue
 
+        # Matrix: per-row choices; keep them as a list of strings and let the
+        # frontend map them to columns (it already understands numeric vs label).
+        if qtype == "matrix":
+            raw_answers = item.get("answers") or item.get("answer")
+            if isinstance(raw_answers, str):
+                # Try to interpret a JSON-like string first, then fall back.
+                try:
+                    parsed = json.loads(raw_answers)
+                    raw_answers = parsed
+                except Exception:
+                    raw_answers = [raw_answers]
+            if isinstance(raw_answers, list):
+                cleaned_answers = [str(a).strip() for a in raw_answers if str(a).strip()]
+                if cleaned_answers:
+                    answers[idx] = cleaned_answers
+            continue
+
         ans = item.get("answer")
         if isinstance(ans, list) and ans:
             ans = ans[0]
@@ -208,8 +229,8 @@ def _parse_page_response(
             ans = ans.strip()
             if not ans:
                 continue
-            if options:
-                validated = _validate_options([ans], options)
+            if options and all(isinstance(o, str) for o in options):
+                validated = _validate_options([ans], options)  # type: ignore[arg-type]
                 if validated:
                     answers[idx] = validated[0]
             else:
