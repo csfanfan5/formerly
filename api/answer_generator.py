@@ -294,6 +294,14 @@ def _fallback_answer(
     qtype = question.get("type")
     options = question.get("options") or []
 
+    def _coerce_to_option(ans: Union[str, None]) -> Union[str, None]:
+        if ans is None or not options:
+            return ans
+        validated = _validate_options([str(ans)], options)
+        if validated:
+            return validated[0]
+        return options[0]
+
     if "email" in qtext:
         return facts.get("email")
     if "name" in qtext:
@@ -301,11 +309,11 @@ def _fallback_answer(
     if "class year" in qtext:
         return facts.get("class_year")
     if "team" in qtext:
-        return facts.get("default_club") or (options[0] if options else None)
+        return _coerce_to_option(facts.get("default_club"))
     if "house" in qtext or "hall" in qtext:
         return facts.get("house")
     if "residence" in qtext:
-        return facts.get("residence_number")
+        return _coerce_to_option(facts.get("residence_number"))
 
     if qtype == "checkbox":
         return options[:1] if options else None
@@ -316,4 +324,4 @@ def _fallback_answer(
         base = question.get("qtext", "this question")
         return f"I appreciate the opportunity to share more about {base.lower()}."
 
-    return None
+    return _coerce_to_option(None)
